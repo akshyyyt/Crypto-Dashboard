@@ -5,10 +5,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Crypto Tracker</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <h1>Crypto Tracker</h1>
+  <header id="mainHeader">
+    <div class="left-side">
+      <span class="logo">◈</span>
+      <h1>Crypto Tracker</h1>
+    </div>
+  </header>
+
+  <main id="content">
+    <section id="marketOverview" class="overview-boxes">
+      <div class="info-box">
+        <div class="box-title">Loading...</div>
+      </div>
+      <div class="info-box">
+        <div class="box-title">Loading...</div>
+      </div>
+    </section>
+
+    <section id="tableArea">
+      <div class="table-container">
+        <table id="coinTable">
+          <thead>
+            <tr>
+              <th class="col-rank">#</th>
+              <th class="col-name">Coin</th>
+              <th class="col-price">Price</th>
+              <th class="col-change">24h %</th>
+              <th class="col-mcap">Market Cap</th>
+            </tr>
+          </thead>
+          <tbody id="tableRows">
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 </body>
 
 </html>
