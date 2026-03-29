@@ -144,3 +144,30 @@ body {
   border-color: var(--yellow);
   color: var(--yellow);
 }
+
+/* Shimmer animation and skeleton styles */
+.loading-placeholder {
+  pointer-events: none;
+}
+
+.placeholder-bar {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--borderColor) 25%, #1c1c1c 50%, var(--borderColor) 75%);
+  background-size: 200% 100%;
+  animation: loading-wave 1.5s infinite;
+}
+
+.placeholder-bar.big {
+  width: 60%;
+  margin-bottom: 8px;
+}
+
+.placeholder-bar.small {
+  width: 40%;
+}
+
+@keyframes loading-wave {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
