@@ -24,3 +24,25 @@ function setupButtons() {
     });
   });
 }
+
+function makeBigNumber(num) {
+  if (num === null || num === undefined || isNaN(num)) return '—';
+  if (num >= 1000000000000) return '$' + (num / 1000000000000).toFixed(2) + 'T';
+  if (num >= 1000000000) return '$' + (num / 1000000000).toFixed(2) + 'B';
+  if (num >= 1000000) return '$' + (num / 1000000).toFixed(2) + 'M';
+  return '$' + num.toLocaleString();
+}
+
+function showPrice(price) {
+  if (price === null || price === undefined || isNaN(price)) return '—';
+  if (price < 1) return '$' + price.toFixed(4);
+  return '$' + price.toFixed(2);
+}
+
+function displayError(message) {
+  console.error('Error:', message);
+}
+
+function clearError() {
+  console.log('Error cleared');
+}
