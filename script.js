@@ -3,6 +3,7 @@ let globalUrl = 'https://api.coingecko.com/api/v3/global';
 
 let allCoins = [];
 let displayedCoins = [];
+let marketInfo = null;
 let sortBy = 'market_cap_desc';
 let isFetching = false;
 
@@ -33,7 +34,10 @@ async function getData() {
 
     allCoins = coinsJson;
     displayedCoins = allCoins.slice();
+    marketInfo = globalJson.data;
+
     console.log('Data fetched successfully');
+    showMarketOverview();
     sortAndShow();
 
   } catch (err) {
@@ -41,6 +45,33 @@ async function getData() {
   }
 
   isFetching = false;
+}
+
+function showMarketOverview() {
+  if (!marketInfo) return;
+
+  const mcap = marketInfo.total_market_cap?.usd || 0;
+  const volume = marketInfo.total_volume?.usd || 0;
+  const btcDom = marketInfo.market_cap_percentage?.btc || 0;
+  const active = marketInfo.active_cryptocurrencies || 0;
+
+  overviewSection.innerHTML = `
+    <div class="info-box">
+      <div class="box-title">Total Market Cap</div>
+      <div class="box-number">${makeBigNumber(mcap)}</div>
+    </div>
+    <div class="info-box">
+      <div class="box-title">24h Volume</div>
+      <div class="box-number">${makeBigNumber(volume)}</div>
+    </div>
+    <div class="info-box">
+      <div class="box-title">BTC Dominance</div>
+      <div class="box-number">${btcDom.toFixed(1)}%</div>
+    </div>
+    <div class="info-box">
+      <div class="box-title">Active Cryptos</div>
+      <div class="box-number">${active.toLocaleString()}</div>
+    </div>`;
 }
 
 function sortAndShow() {
