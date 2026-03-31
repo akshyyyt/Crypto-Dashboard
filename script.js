@@ -34,12 +34,49 @@ async function getData() {
     allCoins = coinsJson;
     displayedCoins = allCoins.slice();
     console.log('Data fetched successfully');
+    sortAndShow();
 
   } catch (err) {
     displayError('Could not load data.');
   }
 
   isFetching = false;
+}
+
+function sortAndShow() {
+  let sorted = displayedCoins.slice();
+
+  if (sortBy === 'market_cap_desc') {
+    sorted.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
+  } else if (sortBy === 'price_desc') {
+    sorted.sort((a, b) => (b.current_price || 0) - (a.current_price || 0));
+  } else if (sortBy === 'change_desc') {
+    sorted.sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0));
+  }
+
+  displayedCoins = sorted;
+  buildTable();
+}
+
+function buildTable() {
+  let rows = displayedCoins.map((coin, i) => {
+    return `
+      <tr>
+        <td class="rank-cell">${coin.market_cap_rank || i + 1}</td>
+        <td>
+          <div class="coin-info">
+            <img src="${coin.image}" width="32" height="32">
+            <span>${coin.name}</span>
+          </div>
+        </td>
+        <td class="price-cell">${showPrice(coin.current_price)}</td>
+        <td class="change-cell">
+          ${coin.price_change_percentage_24h ? coin.price_change_percentage_24h.toFixed(2) : '0.00'}%
+        </td>
+        <td class="mcap-cell">${makeBigNumber(coin.market_cap)}</td>
+      </tr>`;
+  });
+  tableBody.innerHTML = rows.join('');
 }
 
 function setupButtons() {
