@@ -171,3 +171,52 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* Animations */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+  animation: slide-up 0.4s ease-out both;
+}
+
+/* Hover effects and transitions */
+.info-box {
+  background-color: var(--cardBg);
+  border: 1px solid var(--borderColor);
+  border-radius: 12px;
+  padding: 20px 22px;
+  transition: all 0.3s ease;
+}
+
+.info-box:hover {
+  transform: translateY(-4px);
+  border-color: var(--yellow);
+}
+
+#coinTable tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+#coinTable tbody tr:hover {
+  background-color: #1c1c1c;
+}
+
+/* Colors and Badges */
+.going-up { color: #0ecb81; }
+.going-down { color: #f6465d; }
+
+.percent-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.percent-badge.positive { background: rgba(14, 203, 129, 0.15); color: #0ecb81; }
+.percent-badge.negative { background: rgba(246, 70, 93, 0.15); color: #f6465d; }

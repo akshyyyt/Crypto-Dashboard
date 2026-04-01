@@ -56,19 +56,19 @@ function showMarketOverview() {
   const active = marketInfo.active_cryptocurrencies || 0;
 
   overviewSection.innerHTML = `
-    <div class="info-box">
+    <div class="info-box slide-in" style="animation-delay: 0s">
       <div class="box-title">Total Market Cap</div>
       <div class="box-number">${makeBigNumber(mcap)}</div>
     </div>
-    <div class="info-box">
+    <div class="info-box slide-in" style="animation-delay: 0.1s">
       <div class="box-title">24h Volume</div>
       <div class="box-number">${makeBigNumber(volume)}</div>
     </div>
-    <div class="info-box">
+    <div class="info-box slide-in" style="animation-delay: 0.2s">
       <div class="box-title">BTC Dominance</div>
       <div class="box-number">${btcDom.toFixed(1)}%</div>
     </div>
-    <div class="info-box">
+    <div class="info-box slide-in" style="animation-delay: 0.3s">
       <div class="box-title">Active Cryptos</div>
       <div class="box-number">${active.toLocaleString()}</div>
     </div>`;
@@ -91,8 +91,9 @@ function sortAndShow() {
 
 function buildTable() {
   let rows = displayedCoins.map((coin, i) => {
+    const isPos = coin.price_change_percentage_24h >= 0;
     return `
-      <tr>
+      <tr class="slide-in" style="animation-delay: ${i * 0.05}s">
         <td class="rank-cell">${coin.market_cap_rank || i + 1}</td>
         <td>
           <div class="coin-info">
@@ -102,7 +103,9 @@ function buildTable() {
         </td>
         <td class="price-cell">${showPrice(coin.current_price)}</td>
         <td class="change-cell">
-          ${coin.price_change_percentage_24h ? coin.price_change_percentage_24h.toFixed(2) : '0.00'}%
+          <span class="percent-badge ${isPos ? 'positive' : 'negative'}">
+            ${isPos ? '▲' : '▼'} ${Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
+          </span>
         </td>
         <td class="mcap-cell">${makeBigNumber(coin.market_cap)}</td>
       </tr>`;
