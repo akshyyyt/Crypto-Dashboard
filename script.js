@@ -123,9 +123,11 @@ function setupButtons() {
       });
       btn.classList.add('active');
       sortBy = btn.getAttribute('data-sort');
-      console.log('Sort by:', sortBy);
+      sortAndShow();
     });
   });
+
+  document.getElementById('reloadBtn').addEventListener('click', getData);
 }
 
 function makeBigNumber(num) {

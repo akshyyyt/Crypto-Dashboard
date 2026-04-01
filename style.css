@@ -220,3 +220,47 @@ body {
 
 .percent-badge.positive { background: rgba(14, 203, 129, 0.15); color: #0ecb81; }
 .percent-badge.negative { background: rgba(246, 70, 93, 0.15); color: #f6465d; }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  #mainHeader { padding: 0 16px; }
+  .overview-boxes { grid-template-columns: 1fr 1fr; gap: 10px; }
+  #content { padding: 24px 16px; }
+}
+
+@media (max-width: 480px) {
+  .overview-boxes { grid-template-columns: 1fr; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+/* UI Logic and Utility */
+.error-msg {
+  padding: 16px;
+  background: rgba(246, 70, 93, 0.1);
+  border: 1px solid #f6465d;
+  border-radius: 12px;
+  color: #f6465d;
+  margin-top: 20px;
+}
+
+.not-visible { display: none !important; }
+
+.small-btn {
+  background: var(--cardBg);
+  border: 1px solid var(--borderColor);
+  color: var(--textMain);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.small-btn:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
