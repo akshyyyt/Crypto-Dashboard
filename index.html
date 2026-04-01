@@ -12,7 +12,7 @@
   <header id="mainHeader">
     <div class="left-side">
       <span class="logo">◈</span>
-      <h1>Crypto Tracker</h1>
+      <h1>Crypto<span class="yellow-text">Tracker</span></h1>
     </div>
     <div class="right-side">
       <button id="reloadBtn" class="small-btn" title="Reload prices">Ref</button>
@@ -20,7 +20,8 @@
   </header>
 
   <main id="content">
-    <section id="marketOverview" class="overview-boxes">
+
+    <section id="marketOverview" class="overview-boxes" aria-label="Market overview stats">
       <div class="info-box loading-placeholder">
         <div class="placeholder-bar big"></div>
         <div class="placeholder-bar small"></div>
@@ -45,10 +46,11 @@
         <button class="pill-btn active" data-sort="market_cap_desc">Market Cap</button>
         <button class="pill-btn" data-sort="price_desc">Price</button>
         <button class="pill-btn" data-sort="change_desc">24h %</button>
+        <button class="pill-btn" data-sort="volume_desc">Volume</button>
       </div>
     </section>
 
-    <section id="tableArea">
+    <section id="tableArea" aria-label="List of cryptocurrencies">
       <div class="table-container">
         <table id="coinTable">
           <thead>
@@ -58,6 +60,7 @@
               <th class="col-price">Price</th>
               <th class="col-change">24h %</th>
               <th class="col-mcap">Market Cap</th>
+              <th class="col-volume">Volume (24h)</th>
             </tr>
           </thead>
           <tbody id="tableRows">

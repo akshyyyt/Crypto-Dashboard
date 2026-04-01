@@ -1,4 +1,4 @@
-let coinsUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1';
+let coinsUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true';
 let globalUrl = 'https://api.coingecko.com/api/v3/global';
 
 let allCoins = [];
@@ -9,12 +9,34 @@ let isFetching = false;
 
 let overviewSection = document.getElementById('marketOverview');
 let tableBody = document.getElementById('tableRows');
+let errorDiv = document.getElementById('errorBox');
+let errorP = document.getElementById('errorText');
+let reloadButton = document.getElementById('reloadBtn');
 
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('App loaded');
+  showLoadingRows();
   getData();
   setupButtons();
 });
+
+function setupButtons() {
+  let sortButtons = document.querySelectorAll('.pill-btn');
+
+  sortButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      sortButtons.forEach(function (b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      sortBy = btn.getAttribute('data-sort');
+      sortAndShow();
+    });
+  });
+
+  reloadButton.addEventListener('click', function () {
+    getData();
+  });
+}
 
 async function getData() {
   if (isFetching) return;
@@ -36,12 +58,11 @@ async function getData() {
     displayedCoins = allCoins.slice();
     marketInfo = globalJson.data;
 
-    console.log('Data fetched successfully');
     showMarketOverview();
     sortAndShow();
-
   } catch (err) {
-    displayError('Could not load data.');
+    console.log('Error:', err);
+    displayError('Could not load data. Click refresh to try again.');
   }
 
   isFetching = false;
@@ -50,39 +71,82 @@ async function getData() {
 function showMarketOverview() {
   if (!marketInfo) return;
 
-  const mcap = marketInfo.total_market_cap?.usd || 0;
-  const volume = marketInfo.total_volume?.usd || 0;
-  const btcDom = marketInfo.market_cap_percentage?.btc || 0;
-  const active = marketInfo.active_cryptocurrencies || 0;
+  let totalMarketCap = 0;
+  let totalVolume = 0;
+  let btcDominance = 0;
+  let numCryptos = 0;
+  let dayChange = 0;
 
-  overviewSection.innerHTML = `
-    <div class="info-box slide-in" style="animation-delay: 0s">
-      <div class="box-title">Total Market Cap</div>
-      <div class="box-number">${makeBigNumber(mcap)}</div>
-    </div>
-    <div class="info-box slide-in" style="animation-delay: 0.1s">
-      <div class="box-title">24h Volume</div>
-      <div class="box-number">${makeBigNumber(volume)}</div>
-    </div>
-    <div class="info-box slide-in" style="animation-delay: 0.2s">
-      <div class="box-title">BTC Dominance</div>
-      <div class="box-number">${btcDom.toFixed(1)}%</div>
-    </div>
-    <div class="info-box slide-in" style="animation-delay: 0.3s">
-      <div class="box-title">Active Cryptos</div>
-      <div class="box-number">${active.toLocaleString()}</div>
-    </div>`;
+  if (marketInfo.total_market_cap && marketInfo.total_market_cap.usd) {
+    totalMarketCap = marketInfo.total_market_cap.usd;
+  }
+  if (marketInfo.total_volume && marketInfo.total_volume.usd) {
+    totalVolume = marketInfo.total_volume.usd;
+  }
+  if (marketInfo.market_cap_percentage && marketInfo.market_cap_percentage.btc) {
+    btcDominance = marketInfo.market_cap_percentage.btc;
+  }
+  if (marketInfo.active_cryptocurrencies) {
+    numCryptos = marketInfo.active_cryptocurrencies;
+  }
+  if (marketInfo.market_cap_change_percentage_24h_usd) {
+    dayChange = marketInfo.market_cap_change_percentage_24h_usd;
+  }
+
+  let changeClass = 'going-down';
+  let changeArrow = '▼';
+  if (dayChange >= 0) {
+    changeClass = 'going-up';
+    changeArrow = '▲';
+  }
+
+  let html = '';
+
+  html += '<div class="info-box slide-in" style="animation-delay:0s">';
+  html += '<div class="box-title">Total Market Cap</div>';
+  html += '<div class="box-number">' + makeBigNumber(totalMarketCap) + '</div>';
+  html += '<div class="box-extra ' + changeClass + '">';
+  html += changeArrow + ' ' + Math.abs(dayChange).toFixed(2) + '% (24h)';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div class="info-box slide-in" style="animation-delay:0.05s">';
+  html += '<div class="box-title">24h Volume</div>';
+  html += '<div class="box-number">' + makeBigNumber(totalVolume) + '</div>';
+  html += '</div>';
+
+  html += '<div class="info-box slide-in" style="animation-delay:0.1s">';
+  html += '<div class="box-title">BTC Dominance</div>';
+  html += '<div class="box-number">' + btcDominance.toFixed(1) + '%</div>';
+  html += '</div>';
+
+  html += '<div class="info-box slide-in" style="animation-delay:0.15s">';
+  html += '<div class="box-title">Active Cryptos</div>';
+  html += '<div class="box-number">' + numCryptos.toLocaleString() + '</div>';
+  html += '</div>';
+
+  overviewSection.innerHTML = html;
 }
 
 function sortAndShow() {
   let sorted = displayedCoins.slice();
 
   if (sortBy === 'market_cap_desc') {
-    sorted.sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
+    sorted.sort(function (a, b) {
+      return (b.market_cap || 0) - (a.market_cap || 0);
+    });
   } else if (sortBy === 'price_desc') {
-    sorted.sort((a, b) => (b.current_price || 0) - (a.current_price || 0));
+    sorted.sort(function (a, b) {
+      return (b.current_price || 0) - (a.current_price || 0);
+    });
   } else if (sortBy === 'change_desc') {
-    sorted.sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0));
+    sorted.sort(function (a, b) {
+      return (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0);
+    });
+  } else if (sortBy === 'volume_desc') {
+    sorted.sort(function (a, b) {
+      return (b.total_volume || 0) - (a.total_volume || 0);
+    });
   }
 
   displayedCoins = sorted;
@@ -90,64 +154,104 @@ function sortAndShow() {
 }
 
 function buildTable() {
-  let rows = displayedCoins.map((coin, i) => {
-    const isPos = coin.price_change_percentage_24h >= 0;
-    return `
-      <tr class="slide-in" style="animation-delay: ${i * 0.05}s">
-        <td class="rank-cell">${coin.market_cap_rank || i + 1}</td>
-        <td>
-          <div class="coin-info">
-            <img src="${coin.image}" width="32" height="32">
-            <span>${coin.name}</span>
-          </div>
-        </td>
-        <td class="price-cell">${showPrice(coin.current_price)}</td>
-        <td class="change-cell">
-          <span class="percent-badge ${isPos ? 'positive' : 'negative'}">
-            ${isPos ? '▲' : '▼'} ${Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
-          </span>
-        </td>
-        <td class="mcap-cell">${makeBigNumber(coin.market_cap)}</td>
-      </tr>`;
+  let rows = displayedCoins.map(function (coin, i) {
+    let change = coin.price_change_percentage_24h || 0;
+    let isPositive = change >= 0;
+    let arrow = '▼';
+    let badgeClass = 'negative';
+    if (isPositive) {
+      arrow = '▲';
+      badgeClass = 'positive';
+    }
+    let rank = coin.market_cap_rank || (i + 1);
+
+    let row = '';
+    row += '<tr class="slide-in" style="animation-delay:' + (i * 0.03) + 's">';
+    row += '<td class="rank-cell">' + rank + '</td>';
+    row += '<td>';
+    row += '<div class="coin-info">';
+    row += '<img src="' + coin.image + '" alt="' + coin.name + '" loading="lazy" width="32" height="32">';
+    row += '<div>';
+    row += '<span class="coin-title">' + coin.name + '</span>';
+    row += '<span class="coin-ticker">' + coin.symbol + '</span>';
+    row += '</div>';
+    row += '</div>';
+    row += '</td>';
+    row += '<td class="price-cell">' + showPrice(coin.current_price) + '</td>';
+    row += '<td class="change-cell">';
+    row += '<span class="percent-badge ' + badgeClass + '">';
+    row += arrow + ' ' + Math.abs(change).toFixed(2) + '%';
+    row += '</span>';
+    row += '</td>';
+    row += '<td class="mcap-cell">' + makeBigNumber(coin.market_cap) + '</td>';
+    row += '<td class="vol-cell">' + makeBigNumber(coin.total_volume) + '</td>';
+    row += '</tr>';
+    return row;
   });
+
   tableBody.innerHTML = rows.join('');
 }
 
-function setupButtons() {
-  let sortButtons = document.querySelectorAll('.pill-btn');
+function showLoadingRows() {
+  let fakeRows = [];
 
-  sortButtons.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      sortButtons.forEach(function (b) {
-        b.classList.remove('active');
-      });
-      btn.classList.add('active');
-      sortBy = btn.getAttribute('data-sort');
-      sortAndShow();
-    });
-  });
+  for (let i = 0; i < 10; i++) {
+    let row = '';
+    row += '<tr class="fake-row">';
+    row += '<td><div class="fake-cell" style="width:24px;margin:0 auto"></div></td>';
+    row += '<td>';
+    row += '<div class="fake-coin-cell">';
+    row += '<div class="fake-circle"></div>';
+    row += '<div class="fake-cell fake-text"></div>';
+    row += '</div>';
+    row += '</td>';
+    row += '<td><div class="fake-cell" style="width:80px;margin-left:auto"></div></td>';
+    row += '<td><div class="fake-cell" style="width:64px;margin-left:auto"></div></td>';
+    row += '<td><div class="fake-cell" style="width:90px;margin-left:auto"></div></td>';
+    row += '<td><div class="fake-cell" style="width:80px;margin-left:auto"></div></td>';
+    row += '</tr>';
+    fakeRows.push(row);
+  }
 
-  document.getElementById('reloadBtn').addEventListener('click', getData);
+  tableBody.innerHTML = fakeRows.join('');
+}
+
+function displayError(message) {
+  errorP.textContent = message;
+  errorDiv.classList.remove('not-visible');
+}
+
+function clearError() {
+  errorDiv.classList.add('not-visible');
 }
 
 function makeBigNumber(num) {
   if (num === null || num === undefined || isNaN(num)) return '—';
-  if (num >= 1000000000000) return '$' + (num / 1000000000000).toFixed(2) + 'T';
-  if (num >= 1000000000) return '$' + (num / 1000000000).toFixed(2) + 'B';
-  if (num >= 1000000) return '$' + (num / 1000000).toFixed(2) + 'M';
-  return '$' + num.toLocaleString();
+
+  if (num >= 1000000000000) {
+    return '$' + (num / 1000000000000).toFixed(2) + 'T';
+  }
+  if (num >= 1000000000) {
+    return '$' + (num / 1000000000).toFixed(2) + 'B';
+  }
+  if (num >= 1000000) {
+    return '$' + (num / 1000000).toFixed(2) + 'M';
+  }
+  if (num >= 1000) {
+    return '$' + (num / 1000).toFixed(1) + 'K';
+  }
+
+  return '$' + num.toFixed(2);
 }
 
 function showPrice(price) {
   if (price === null || price === undefined || isNaN(price)) return '—';
-  if (price < 1) return '$' + price.toFixed(4);
+
+  if (price < 0.01) {
+    return '$' + price.toFixed(6);
+  }
+  if (price < 1) {
+    return '$' + price.toFixed(4);
+  }
   return '$' + price.toFixed(2);
-}
-
-function displayError(message) {
-  console.error('Error:', message);
-}
-
-function clearError() {
-  console.log('Error cleared');
 }
